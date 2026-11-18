@@ -1,0 +1,19 @@
+{
+  "source": "mock",
+  "label": "Shipping: est. allowance — final at checkout",
+  "allowancesCents": {
+    "couch": 7900,
+    "chairs": 2500,
+    "coffee-table": 3500,
+    "cabinet": 4900,
+    "couch-pillows": 800,
+    "chair-pillows": 800,
+    "additional-pillows": 800,
+    "side-tables": 1900,
+    "wall-painting": 1200,
+    "lamp": 1500,
+    "books": 600,
+    "candles": 600,
+    "posters": 700
+  }
+}

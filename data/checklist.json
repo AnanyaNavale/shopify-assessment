@@ -1,0 +1,115 @@
+{
+  "source": "mock",
+  "room": "Living room",
+  "tiers": [
+    { "id": 1, "name": "Basics" },
+    { "id": 2, "name": "Upgraded basics" },
+    { "id": 3, "name": "Accessories" }
+  ],
+  "items": [
+    {
+      "id": "couch",
+      "name": "Couch",
+      "tierId": 1,
+      "defaultQuantity": 1,
+      "quantityNote": null,
+      "enabledByDefault": true
+    },
+    {
+      "id": "chairs",
+      "name": "Chairs",
+      "tierId": 1,
+      "defaultQuantity": 1,
+      "quantityNote": "1–2",
+      "enabledByDefault": true
+    },
+    {
+      "id": "coffee-table",
+      "name": "Coffee table",
+      "tierId": 1,
+      "defaultQuantity": 1,
+      "quantityNote": null,
+      "enabledByDefault": true
+    },
+    {
+      "id": "cabinet",
+      "name": "Cabinet",
+      "tierId": 2,
+      "defaultQuantity": 1,
+      "quantityNote": null,
+      "enabledByDefault": true
+    },
+    {
+      "id": "couch-pillows",
+      "name": "Couch pillows",
+      "tierId": 2,
+      "defaultQuantity": 2,
+      "quantityNote": "2 per couch",
+      "enabledByDefault": true
+    },
+    {
+      "id": "chair-pillows",
+      "name": "Chair pillows",
+      "tierId": 2,
+      "defaultQuantity": 1,
+      "quantityNote": "1 per chair",
+      "enabledByDefault": true
+    },
+    {
+      "id": "additional-pillows",
+      "name": "Additional pillows",
+      "tierId": 3,
+      "defaultQuantity": 1,
+      "quantityNote": "as desired",
+      "enabledByDefault": true
+    },
+    {
+      "id": "side-tables",
+      "name": "Side tables",
+      "tierId": 3,
+      "defaultQuantity": 1,
+      "quantityNote": null,
+      "enabledByDefault": true
+    },
+    {
+      "id": "wall-painting",
+      "name": "Wall painting",
+      "tierId": 3,
+      "defaultQuantity": 1,
+      "quantityNote": null,
+      "enabledByDefault": true
+    },
+    {
+      "id": "lamp",
+      "name": "Lamp",
+      "tierId": 3,
+      "defaultQuantity": 1,
+      "quantityNote": null,
+      "enabledByDefault": true
+    },
+    {
+      "id": "books",
+      "name": "Books",
+      "tierId": 3,
+      "defaultQuantity": 1,
+      "quantityNote": null,
+      "enabledByDefault": true
+    },
+    {
+      "id": "candles",
+      "name": "Candles",
+      "tierId": 3,
+      "defaultQuantity": 1,
+      "quantityNote": null,
+      "enabledByDefault": true
+    },
+    {
+      "id": "posters",
+      "name": "Posters",
+      "tierId": 3,
+      "defaultQuantity": 1,
+      "quantityNote": null,
+      "enabledByDefault": true
+    }
+  ]
+}

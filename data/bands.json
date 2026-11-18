@@ -1,0 +1,140 @@
+{
+  "source": "mock",
+  "preferenceSlice": {
+    "itemId": "couch",
+    "material": "velvet",
+    "color": "blue"
+  },
+  "items": [
+    {
+      "itemId": "couch",
+      "bands": [
+        { "minCents": 20000, "maxCents": 49999, "generalCount": 380, "filteredCount": 8 },
+        { "minCents": 50000, "maxCents": 99999, "generalCount": 860, "filteredCount": 34 },
+        { "minCents": 100000, "maxCents": 179999, "generalCount": 1210, "filteredCount": 90 },
+        { "minCents": 180000, "maxCents": 299999, "generalCount": 740, "filteredCount": 210 },
+        { "minCents": 300000, "maxCents": null, "generalCount": 290, "filteredCount": 55 }
+      ]
+    },
+    {
+      "itemId": "chairs",
+      "bands": [
+        { "minCents": 4000, "maxCents": 14999, "generalCount": 640 },
+        { "minCents": 15000, "maxCents": 29999, "generalCount": 980 },
+        { "minCents": 30000, "maxCents": 59999, "generalCount": 1120 },
+        { "minCents": 60000, "maxCents": 99999, "generalCount": 540 },
+        { "minCents": 100000, "maxCents": null, "generalCount": 180 }
+      ]
+    },
+    {
+      "itemId": "coffee-table",
+      "bands": [
+        { "minCents": 5000, "maxCents": 14999, "generalCount": 420 },
+        { "minCents": 15000, "maxCents": 29999, "generalCount": 760 },
+        { "minCents": 30000, "maxCents": 49999, "generalCount": 890 },
+        { "minCents": 50000, "maxCents": 89999, "generalCount": 410 },
+        { "minCents": 90000, "maxCents": null, "generalCount": 150 }
+      ]
+    },
+    {
+      "itemId": "cabinet",
+      "bands": [
+        { "minCents": 10000, "maxCents": 29999, "generalCount": 210 },
+        { "minCents": 30000, "maxCents": 59999, "generalCount": 480 },
+        { "minCents": 60000, "maxCents": 99999, "generalCount": 620 },
+        { "minCents": 100000, "maxCents": 179999, "generalCount": 390 },
+        { "minCents": 180000, "maxCents": null, "generalCount": 140 }
+      ]
+    },
+    {
+      "itemId": "couch-pillows",
+      "bands": [
+        { "minCents": 1500, "maxCents": 2999, "generalCount": 900 },
+        { "minCents": 3000, "maxCents": 4999, "generalCount": 1400 },
+        { "minCents": 5000, "maxCents": 7999, "generalCount": 1600 },
+        { "minCents": 8000, "maxCents": 12999, "generalCount": 700 },
+        { "minCents": 13000, "maxCents": null, "generalCount": 220 }
+      ]
+    },
+    {
+      "itemId": "chair-pillows",
+      "bands": [
+        { "minCents": 1200, "maxCents": 2499, "generalCount": 800 },
+        { "minCents": 2500, "maxCents": 3999, "generalCount": 1100 },
+        { "minCents": 4000, "maxCents": 6999, "generalCount": 980 },
+        { "minCents": 7000, "maxCents": 9999, "generalCount": 420 },
+        { "minCents": 10000, "maxCents": null, "generalCount": 160 }
+      ]
+    },
+    {
+      "itemId": "additional-pillows",
+      "bands": [
+        { "minCents": 1500, "maxCents": 2999, "generalCount": 1100 },
+        { "minCents": 3000, "maxCents": 4999, "generalCount": 1500 },
+        { "minCents": 5000, "maxCents": 7999, "generalCount": 1300 },
+        { "minCents": 8000, "maxCents": 12999, "generalCount": 600 },
+        { "minCents": 13000, "maxCents": null, "generalCount": 180 }
+      ]
+    },
+    {
+      "itemId": "side-tables",
+      "bands": [
+        { "minCents": 4000, "maxCents": 9999, "generalCount": 520 },
+        { "minCents": 10000, "maxCents": 19999, "generalCount": 840 },
+        { "minCents": 20000, "maxCents": 34999, "generalCount": 910 },
+        { "minCents": 35000, "maxCents": 59999, "generalCount": 430 },
+        { "minCents": 60000, "maxCents": null, "generalCount": 120 }
+      ]
+    },
+    {
+      "itemId": "wall-painting",
+      "bands": [
+        { "minCents": 2000, "maxCents": 4999, "generalCount": 1500 },
+        { "minCents": 5000, "maxCents": 9999, "generalCount": 1200 },
+        { "minCents": 10000, "maxCents": 19999, "generalCount": 860 },
+        { "minCents": 20000, "maxCents": 39999, "generalCount": 340 },
+        { "minCents": 40000, "maxCents": null, "generalCount": 90 }
+      ]
+    },
+    {
+      "itemId": "lamp",
+      "bands": [
+        { "minCents": 2500, "maxCents": 5999, "generalCount": 980 },
+        { "minCents": 6000, "maxCents": 11999, "generalCount": 1100 },
+        { "minCents": 12000, "maxCents": 19999, "generalCount": 740 },
+        { "minCents": 20000, "maxCents": 34999, "generalCount": 310 },
+        { "minCents": 35000, "maxCents": null, "generalCount": 80 }
+      ]
+    },
+    {
+      "itemId": "books",
+      "bands": [
+        { "minCents": 1000, "maxCents": 1999, "generalCount": 2200 },
+        { "minCents": 2000, "maxCents": 3499, "generalCount": 1800 },
+        { "minCents": 3500, "maxCents": 4999, "generalCount": 900 },
+        { "minCents": 5000, "maxCents": 7999, "generalCount": 320 },
+        { "minCents": 8000, "maxCents": null, "generalCount": 70 }
+      ]
+    },
+    {
+      "itemId": "candles",
+      "bands": [
+        { "minCents": 800, "maxCents": 1599, "generalCount": 2600 },
+        { "minCents": 1600, "maxCents": 2899, "generalCount": 1900 },
+        { "minCents": 2900, "maxCents": 4599, "generalCount": 840 },
+        { "minCents": 4600, "maxCents": 7099, "generalCount": 260 },
+        { "minCents": 7100, "maxCents": null, "generalCount": 60 }
+      ]
+    },
+    {
+      "itemId": "posters",
+      "bands": [
+        { "minCents": 1000, "maxCents": 1999, "generalCount": 1700 },
+        { "minCents": 2000, "maxCents": 3499, "generalCount": 1200 },
+        { "minCents": 3500, "maxCents": 5999, "generalCount": 640 },
+        { "minCents": 6000, "maxCents": 9999, "generalCount": 210 },
+        { "minCents": 10000, "maxCents": null, "generalCount": 40 }
+      ]
+    }
+  ]
+}
