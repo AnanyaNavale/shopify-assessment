@@ -167,6 +167,8 @@ export function rebalance(
     }
   }
 
+  overByCents = absorbRoomIncrease(items, touched);
+
   for (const item of items) {
     item.currentLabel = rangeLabel(item.currentMinCents, item.currentMaxCents);
   }
@@ -213,6 +215,104 @@ export function rebalance(
     roomLabel: overByCents > 0 ? originalRoomLabel : adjustedRoomLabel,
     originalRoomLabel,
   };
+}
+
+export function roomTotalIncreased(items: AdjustedBudget[]): boolean {
+  const before = roomBounds(items, "original");
+  const after = roomBounds(items, "current");
+  if (before.open || after.open) {
+    if (after.open && !before.open) {
+      return true;
+    }
+    if (!after.open && before.open) {
+      return after.min > before.min;
+    }
+    return after.min > before.min;
+  }
+  return after.min > before.min || after.max > before.max;
+}
+
+function roomBounds(
+  items: AdjustedBudget[],
+  field: "original" | "current",
+): { min: number; max: number; open: boolean } {
+  let min = 0;
+  let max = 0;
+  let open = false;
+  for (const item of items) {
+    if (!item.enabled) {
+      continue;
+    }
+    if (field === "current" && item.cut) {
+      continue;
+    }
+    if (field === "current" && item.comparison === "over" && item.cart) {
+      min += item.cart.totalCents;
+      max += item.cart.totalCents;
+      continue;
+    }
+    const itemMin = field === "original" ? item.originalMinCents : item.currentMinCents;
+    const itemMax = field === "original" ? item.originalMaxCents : item.currentMaxCents;
+    min += itemMin;
+    if (itemMax === null) {
+      open = true;
+    } else {
+      max += itemMax;
+    }
+  }
+  return { min, max, open };
+}
+
+function absorbRoomIncrease(items: WorkingItem[], touched: string[]): number {
+  if (!items.some((item) => item.comparison === "over")) {
+    return 0;
+  }
+  const before = roomBounds(items, "original");
+  const highestOver = Math.min(
+    ...items.filter((item) => item.comparison === "over").map((item) => item.priority),
+  );
+  const donors = items
+    .filter(
+      (item) =>
+        item.enabled &&
+        !item.cut &&
+        !item.cart &&
+        item.priority > highestOver &&
+        item.currentMaxCents !== null,
+    )
+    .sort((a, b) => b.priority - a.priority);
+
+  for (const donor of donors) {
+    const after = roomBounds(items, "current");
+    const extraMin = Math.max(0, after.min - before.min);
+    const extraMax = !before.open && !after.open ? Math.max(0, after.max - before.max) : 0;
+    if (extraMin === 0 && extraMax === 0) {
+      return 0;
+    }
+    if (donor.currentMaxCents === null) {
+      continue;
+    }
+    const reduce = Math.max(extraMin, extraMax);
+    donor.currentMaxCents = Math.max(0, donor.currentMaxCents - reduce);
+    donor.currentMinCents = Math.max(0, donor.currentMinCents - extraMin);
+    if (donor.currentMaxCents < donor.currentMinCents) {
+      donor.currentMinCents = donor.currentMaxCents;
+    }
+    donor.slashed = true;
+    if (!touched.includes(donor.name)) {
+      touched.push(donor.name);
+    }
+    if (donor.currentMaxCents < donor.cheapestCents) {
+      donor.currentMinCents = 0;
+      donor.currentMaxCents = 0;
+      donor.cut = true;
+    }
+  }
+
+  const settled = roomBounds(items, "current");
+  const minLeft = Math.max(0, settled.min - before.min);
+  const maxLeft = !before.open && !settled.open ? Math.max(0, settled.max - before.max) : 0;
+  return Math.max(minLeft, maxLeft);
 }
 
 function roomLabel(ranges: { totalMinCents: number; totalMaxCents: number | null }[]): string {
@@ -281,7 +381,6 @@ export function cartSummary(result: RebalanceResult): { tone: "within" | "over";
   const lines = ["Your cart value lands within the budgeted range."];
   if (underCents > 0) {
     const left = formatCents(underCents);
-    lines.push(`${left} under budget.`);
     lines.push(
       `You have ${left} left over from this room. Upgrade something here, or save it to your house fund for another room?`,
     );

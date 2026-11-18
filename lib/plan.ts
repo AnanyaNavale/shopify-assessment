@@ -11,6 +11,8 @@ import { applyUnderspend, type UnderspendChoice } from "@/lib/underspend";
 
 export type ItemPreference = { color: string; material?: string };
 
+export type AcceptedBudget = { minCents: number; maxCents: number | null };
+
 export type BudgetPlan = RebalanceResult & { houseFundCents: number };
 
 export function buildAdjustedBudget({
@@ -23,6 +25,7 @@ export function buildAdjustedBudget({
   postalCode,
   cart,
   choices = {},
+  accepted = {},
 }: {
   tiers: ChecklistTier[];
   items: ChecklistItem[];
@@ -33,6 +36,7 @@ export function buildAdjustedBudget({
   postalCode: string;
   cart: Record<string, Listing>;
   choices?: Record<string, UnderspendChoice>;
+  accepted?: Record<string, AcceptedBudget>;
 }): BudgetPlan {
   const priorityOf = new Map<string, number>();
   let rank = 0;
@@ -55,9 +59,15 @@ export function buildAdjustedBudget({
         },
         quantity,
       ).ranges;
-      const minCents = ranges.length === 0 ? 0 : Math.min(...ranges.map((range) => range.totalMinCents));
-      const maxCents =
-        ranges.length === 0
+      const saved = accepted[item.id];
+      const minCents = saved
+        ? saved.minCents
+        : ranges.length === 0
+          ? 0
+          : Math.min(...ranges.map((range) => range.totalMinCents));
+      const maxCents = saved
+        ? saved.maxCents
+        : ranges.length === 0
           ? 0
           : ranges.some((range) => range.totalMaxCents === null)
             ? null

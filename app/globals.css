@@ -17,3 +17,35 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
+
+.checklist-card,
+.checklist-card * {
+  cursor: pointer;
+}
+
+.checklist-card .drag-handle,
+.checklist-card .drag-handle * {
+  cursor: grab !important;
+}
+
+.checklist-card .drag-handle:active,
+.checklist-card .drag-handle:active * {
+  cursor: grabbing !important;
+}
+
+.checklist-card .qty-input {
+  cursor: text !important;
+}
+
+dialog,
+dialog:focus,
+dialog:focus-visible,
+dialog *,
+dialog *:focus,
+dialog *:focus-visible {
+  outline: none;
+}
+
+dialog button {
+  cursor: pointer !important;
+}

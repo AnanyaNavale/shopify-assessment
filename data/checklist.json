@@ -20,7 +20,7 @@
       "name": "Chairs",
       "tierId": 1,
       "defaultQuantity": 1,
-      "quantityNote": "1–2",
+      "quantityNote": null,
       "enabledByDefault": true
     },
     {
@@ -44,7 +44,7 @@
       "name": "Couch pillows",
       "tierId": 2,
       "defaultQuantity": 2,
-      "quantityNote": "2 per couch",
+      "quantityNote": null,
       "enabledByDefault": true
     },
     {
@@ -52,7 +52,7 @@
       "name": "Chair pillows",
       "tierId": 2,
       "defaultQuantity": 1,
-      "quantityNote": "1 per chair",
+      "quantityNote": null,
       "enabledByDefault": true
     },
     {
@@ -60,7 +60,7 @@
       "name": "Additional pillows",
       "tierId": 3,
       "defaultQuantity": 1,
-      "quantityNote": "as desired",
+      "quantityNote": null,
       "enabledByDefault": true
     },
     {

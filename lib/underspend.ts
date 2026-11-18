@@ -14,6 +14,17 @@ export function underspendSurplus(item: AdjustedBudget): number {
   return Math.max(0, item.originalMinCents - item.cart.totalCents);
 }
 
+export function choiceSurplus(item: AdjustedBudget): number {
+  const under = underspendSurplus(item);
+  if (under > 0) {
+    return under;
+  }
+  if (!item.enabled || !item.cart || item.comparison !== "within" || item.currentMaxCents === null) {
+    return 0;
+  }
+  return Math.max(0, item.currentMaxCents - item.cart.totalCents);
+}
+
 export function underspendRecipient(
   items: AdjustedBudget[],
   itemId: string,
@@ -37,7 +48,7 @@ export function applyUnderspend(
 
   for (const item of items) {
     const choice = choices[item.id];
-    const surplus = underspendSurplus(item);
+    const surplus = choiceSurplus(item);
     if (!choice || !item.cart || surplus <= 0) {
       continue;
     }

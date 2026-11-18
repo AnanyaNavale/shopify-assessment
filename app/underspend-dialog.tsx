@@ -33,20 +33,20 @@ export function UnderspendDialog({
         onDismiss();
       }}
       aria-labelledby="underspend-title"
-      className="w-full max-w-md rounded-lg p-5 backdrop:bg-black/40"
+      className="fixed top-1/2 left-1/2 m-0 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg p-5 outline-none backdrop:bg-black/40"
     >
-      <h2 id="underspend-title" className="text-base font-medium text-neutral-900">
+      <h2 id="underspend-title" className="text-lg font-semibold text-neutral-900">
         Under the budgeted range
       </h2>
       <p className="mt-3 text-sm leading-6 text-neutral-800">
-        This {item.name.toLowerCase()} is {amount} under the budgeted range.
+        This {item.name === "Couch pillows" ? "couch pillow" : item.name.toLowerCase()} is {amount} under the budgeted range.
       </p>
       <div className="mt-4 flex flex-col gap-2">
         {recipient ? (
           <button
             type="button"
             onClick={onMove}
-            className="rounded-md bg-neutral-900 px-4 py-2 text-sm text-white"
+            className="cursor-pointer rounded-full bg-neutral-900 px-4 py-2 text-sm text-white"
           >
             Add {amount} to {recipient.name.toLowerCase()}
           </button>
@@ -54,14 +54,14 @@ export function UnderspendDialog({
         <button
           type="button"
           onClick={onSave}
-          className="rounded-md border border-neutral-300 px-4 py-2 text-sm text-neutral-900"
+          className="cursor-pointer rounded-full border border-neutral-300 px-4 py-2 text-sm text-neutral-900"
         >
           Save {amount} to the house fund
         </button>
         <button
           type="button"
           onClick={onDismiss}
-          className="px-4 py-2 text-sm text-neutral-500"
+          className="cursor-pointer rounded-full px-4 py-2 text-sm text-neutral-500"
         >
           Not now
         </button>
