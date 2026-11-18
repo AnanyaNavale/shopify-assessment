@@ -1,12 +1,15 @@
 import bandsJson from "@/data/bands.json";
 import checklistJson from "@/data/checklist.json";
-import listingsJson from "@/data/listings.json";
+import liveGeneralsJson from "@/data/live-generals.json";
+import liveSlicesJson from "@/data/live-slices.json";
 import shippingJson from "@/data/shipping.json";
 
 /**
- * Mock catalog shaped like Catalog search results.
- * Postal code is accepted on every read and does not filter this dataset.
- * Filtered band counts exist only for couch + material "velvet" + color "blue".
+ * Catalog reads. Listings come only from saved Catalog searches.
+ * A color uses the same query as the general search, plus a Color filter.
+ * Material is not part of the query. Shipping, cart, and checkout stay mock.
+ * Saved searches are limited to products that ship to 94582.
+ * The postal code typed in the app does not re-query these files.
  */
 
 export type CatalogContext = {
@@ -48,7 +51,7 @@ export type Listing = {
   listPriceCents: number | null;
   imageUrl: string;
   runningLow: boolean;
-  rating: number;
+  rating: number | null;
   sellerName: string;
   matchesPreference: boolean;
   automaticPromotion: { amountOffCents: number } | null;
@@ -66,28 +69,44 @@ type BandRecord = {
   filteredCount?: number;
 };
 
+type SavedSlice = {
+  itemId: string;
+  color: string;
+  bands: { filteredCount: number }[];
+  listings: Listing[];
+};
+
 const checklist = checklistJson;
 const bands = bandsJson;
-const listings = listingsJson.listings as Listing[];
 const shipping = shippingJson;
 
-const PREFERENCE_SLICE = bands.preferenceSlice;
+const generalItems = liveGeneralsJson.items as {
+  itemId: string;
+  bands: { generalCount: number }[];
+  listings?: Listing[];
+}[];
+const listings: Listing[] = generalItems.flatMap((item) => item.listings ?? []);
+
+const generalCounts = new Map(
+  generalItems.map((item) => [item.itemId, item.bands.map((band) => band.generalCount)]),
+);
+
+const savedSlices = liveSlicesJson.slices as SavedSlice[];
 
 function normalize(value: string | undefined): string {
   return value?.trim().toLowerCase() ?? "";
 }
 
-function matchesPreferenceSlice(
+function findSavedSlice(
   itemId: string,
   context: CatalogContext | undefined,
-): boolean {
-  if (!context?.material && !context?.color) {
-    return false;
+): SavedSlice | null {
+  const color = normalize(context?.color);
+  if (!color) {
+    return null;
   }
   return (
-    itemId === PREFERENCE_SLICE.itemId &&
-    normalize(context.material) === PREFERENCE_SLICE.material &&
-    normalize(context.color) === PREFERENCE_SLICE.color
+    savedSlices.find((slice) => slice.itemId === itemId && slice.color === color) ?? null
   );
 }
 
@@ -113,9 +132,14 @@ export function formatBandLabel(minCents: number, maxCents: number | null): stri
 function itemBands(itemId: string): BandRecord[] {
   const item = bands.items.find((entry) => entry.itemId === itemId);
   if (!item) {
-    throw new Error(`No mock price bands for item "${itemId}".`);
+    throw new Error(`No price bands for item "${itemId}".`);
   }
-  return item.bands;
+  const counts = generalCounts.get(itemId);
+  return item.bands.map((band, index) => ({
+    minCents: band.minCents,
+    maxCents: band.maxCents,
+    generalCount: counts?.[index] ?? band.generalCount,
+  }));
 }
 
 export function getChecklistTemplate(): {
@@ -136,14 +160,14 @@ export function getPriceBands(
   itemId: string,
   context?: CatalogContext,
 ): PriceBand[] {
-  const applyFilter = matchesPreferenceSlice(itemId, context);
+  const slice = findSavedSlice(itemId, context);
   return itemBands(itemId).map((band, index) => ({
     index,
     minCents: band.minCents,
     maxCents: band.maxCents,
     label: formatBandLabel(band.minCents, band.maxCents),
     generalCount: band.generalCount,
-    filteredCount: applyFilter ? (band.filteredCount ?? null) : null,
+    filteredCount: slice ? (slice.bands[index]?.filteredCount ?? null) : null,
   }));
 }
 
@@ -154,23 +178,25 @@ export function getListings(
 ): ListingGroups {
   const bandCount = itemBands(itemId).length;
   if (bandIndex < 0 || bandIndex >= bandCount) {
-    throw new Error(`Band ${bandIndex} is outside the mock bands for "${itemId}".`);
+    throw new Error(`Band ${bandIndex} is outside the bands for "${itemId}".`);
   }
 
   const inBand = listings.filter(
     (listing) => listing.itemId === itemId && listing.bandIndex === bandIndex,
   );
-  const applyFilter = matchesPreferenceSlice(itemId, context);
+  const slice = findSavedSlice(itemId, context);
 
-  if (!applyFilter) {
+  if (!slice) {
     return { preferred: [], others: inBand };
   }
 
+  const preferred = slice.listings
+    .filter((listing) => listing.bandIndex === bandIndex)
+    .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+  const preferredIds = new Set(preferred.map((listing) => listing.id));
   return {
-    preferred: inBand
-      .filter((listing) => listing.matchesPreference)
-      .sort((a, b) => b.rating - a.rating),
-    others: inBand.filter((listing) => !listing.matchesPreference),
+    preferred,
+    others: inBand.filter((listing) => !preferredIds.has(listing.id) && !listing.matchesPreference),
   };
 }
 
@@ -202,6 +228,7 @@ export function getShippingAllowance(itemId: string): {
 
 export function getMockCatalogSummary(): {
   source: "mock";
+  couchSource: "catalog" | "mock";
   itemCount: number;
   bandCountPerItem: number;
   couchListingCount: number;
@@ -211,6 +238,7 @@ export function getMockCatalogSummary(): {
   const promotionCount = listings.filter((listing) => listing.automaticPromotion).length;
   return {
     source: "mock",
+    couchSource: generalCounts.has("couch") ? "catalog" : "mock",
     itemCount: checklist.items.length,
     bandCountPerItem: itemBands("couch").length,
     couchListingCount,

@@ -129,8 +129,13 @@ function highlightedIndexes(
     if (preferred.length === 0) {
       return { index, rating: null as number | null };
     }
-    const rating =
-      preferred.reduce((sum, listing) => sum + listing.rating, 0) / preferred.length;
+    const ratings = preferred
+      .map((listing) => listing.rating)
+      .filter((rating): rating is number => rating !== null);
+    if (ratings.length === 0) {
+      return { index, rating: null as number | null };
+    }
+    const rating = ratings.reduce((sum, value) => sum + value, 0) / ratings.length;
     return { index, rating };
   });
   const rated = scored.filter((entry) => entry.rating !== null);
@@ -148,10 +153,7 @@ function comparisonText(
   highlighted: number[],
 ): string {
   const plural = ITEM_PLURAL[itemId] ?? "items";
-  const taste = [context.color, context.material]
-    .map((value) => value?.trim().toLowerCase())
-    .filter(Boolean)
-    .join(" ");
+  const taste = context.color?.trim().toLowerCase() ?? "";
   const highlightedBands = bands.filter((band) => highlighted.includes(band.index));
   const bandPhrase =
     highlightedBands.length === 1
@@ -179,7 +181,7 @@ function comparisonText(
   const availability = `Most ${taste} ${plural} are in ${bandPhrase} (~${matchHere} of ~${matchTotal}).`;
 
   if (belowPct >= 60) {
-    return `${availability} Most ${taste} ${plural} are priced higher than about ${belowPct}% of all ${plural}. Other materials or colors may have more options at a lower price.`;
+    return `${availability} Most ${taste} ${plural} are priced higher than about ${belowPct}% of all ${plural}. Other colors may have more options at a lower price.`;
   }
   if (abovePct >= 60) {
     return `${availability} Most ${taste} ${plural} are priced lower than about ${abovePct}% of all ${plural}. More options are also available at higher prices.`;
@@ -187,12 +189,8 @@ function comparisonText(
   return `${availability} Most ${taste} ${plural} are priced higher than about ${belowPct}% of all ${plural}.`;
 }
 
-function gapText(context: CatalogContext): string {
-  const hasMaterial = Boolean(context.material?.trim());
-  const hasColor = Boolean(context.color?.trim());
-  const subject =
-    hasMaterial && hasColor ? "this material and color" : hasMaterial ? "this material" : "this color";
-  return `The mock catalog has no filtered counts for ${subject}. The chart shows the whole market, and the middle band is highlighted.`;
+function gapText(): string {
+  return "The saved catalog has no filtered counts for this color. The chart shows the whole market, and the middle band is highlighted.";
 }
 
 export function getChartModel(
@@ -209,7 +207,7 @@ export function getChartModel(
   const hasFilteredCounts = bands.some((band) => band.filteredCount !== null);
   const highlighted = highlightedIndexes(bands, itemId, context, hasFilteredCounts);
   const shipping = getShippingAllowance(itemId);
-  const hasPreference = Boolean(context.material?.trim() || context.color?.trim());
+  const hasPreference = Boolean(context.color?.trim());
 
   const chartBands: ChartBand[] = bands.map((band) => {
     const matchCount = hasFilteredCounts
@@ -246,10 +244,10 @@ export function getChartModel(
   if (!hasPreference) {
     summary = {
       kind: "none",
-      text: "No material or color entered, so the middle band is highlighted.",
+      text: "No color entered, so the middle band is highlighted.",
     };
   } else if (!hasFilteredCounts) {
-    summary = { kind: "mock-gap", text: gapText(context) };
+    summary = { kind: "mock-gap", text: gapText() };
   } else {
     summary = {
       kind: "comparison",

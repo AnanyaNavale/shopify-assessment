@@ -9,7 +9,7 @@ import { getChartModel } from "@/lib/market";
 import { cartLine, rebalance, type RebalanceResult } from "@/lib/rebalance";
 import { applyUnderspend, type UnderspendChoice } from "@/lib/underspend";
 
-export type ItemPreference = { material: string; color: string };
+export type ItemPreference = { color: string; material?: string };
 
 export type BudgetPlan = RebalanceResult & { houseFundCents: number };
 
@@ -50,7 +50,7 @@ export function buildAdjustedBudget({
         item.id,
         {
           postalCode,
-          material: preferences[item.id]?.material.trim() || undefined,
+          material: preferences[item.id]?.material?.trim() || undefined,
           color: preferences[item.id]?.color.trim() || undefined,
         },
         quantity,

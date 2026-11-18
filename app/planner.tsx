@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
 import { CartView } from "@/app/cart-view";
 import { BudgetPanel } from "@/app/checklist";
 import { ListingsSection } from "@/app/listings";
@@ -16,9 +16,10 @@ type CatalogSummary = {
   bandCountPerItem: number;
   couchListingCount: number;
   promotionCount: number;
+  couchSource: "catalog" | "mock";
 };
 
-type ItemPreference = { material: string; color: string };
+type ItemPreference = { color: string };
 
 export function Planner({
   items,
@@ -29,8 +30,7 @@ export function Planner({
   tiers: ChecklistTier[];
   summary: CatalogSummary;
 }) {
-  const [postalCode, setPostalCode] = useState<string | null>(null);
-  const [postalDraft, setPostalDraft] = useState("");
+  const [postalCode, setPostalCode] = useState("");
   const [itemId, setItemId] = useState(
     items.find((item) => item.id === "couch")?.id ?? items[0]?.id ?? "",
   );
@@ -55,12 +55,10 @@ export function Planner({
   const [dismissed, setDismissed] = useState<Record<string, string>>({});
   const [showCart, setShowCart] = useState(false);
 
-  const material = preferences[itemId]?.material ?? "";
   const color = preferences[itemId]?.color ?? "";
 
-  const trimmedPostal = postalDraft.trim();
   const itemName = items.find((item) => item.id === itemId)?.name ?? "Item";
-  const materialText = material.trim() || "—";
+  const postalText = postalCode.trim() || "—";
   const colorText = color.trim() || "—";
 
   function forgetChoice(id: string) {
@@ -89,7 +87,7 @@ export function Planner({
     quantities,
     enabled,
     preferences,
-    postalCode: postalCode ?? "",
+    postalCode,
     cart,
     choices,
   });
@@ -116,14 +114,6 @@ export function Planner({
     }));
   }
 
-  function savePostalCode(event: FormEvent) {
-    event.preventDefault();
-    if (!trimmedPostal) {
-      return;
-    }
-    setPostalCode(trimmedPostal);
-  }
-
   return (
     <div className="min-w-[1120px]">
       <header className="flex h-14 items-center justify-between border-b border-neutral-200 bg-white px-6">
@@ -132,49 +122,18 @@ export function Planner({
           <span className="text-sm text-neutral-500">Room budget</span>
         </div>
         <div className="flex items-center gap-4">
-          {postalCode ? (
-            <button
-              type="button"
-              onClick={() => setShowCart((current) => !current)}
-              className="rounded-md bg-neutral-900 px-3 py-1.5 text-sm text-white"
-            >
-              {showCart ? "Back to room" : "Review cart"}
-            </button>
-          ) : null}
-          <p className="text-sm text-neutral-500">
-            {postalCode
-              ? `Postal code ${postalCode} · Living room · mock catalog`
-              : "Living room · mock catalog"}
-          </p>
+          <button
+            type="button"
+            onClick={() => setShowCart((current) => !current)}
+            className="rounded-md bg-neutral-900 px-3 py-1.5 text-sm text-white"
+          >
+            {showCart ? "Back to room" : "Review cart"}
+          </button>
+          <p className="text-sm text-neutral-500">Living room · mock catalog</p>
         </div>
       </header>
 
-      {postalCode === null ? (
-        <main className="mx-auto max-w-md p-6">
-          <form
-            onSubmit={savePostalCode}
-            className="rounded-lg border border-neutral-200 bg-white p-5"
-          >
-            <label htmlFor="postal-code" className="text-sm font-medium text-neutral-900">
-              Postal code
-            </label>
-            <input
-              id="postal-code"
-              value={postalDraft}
-              onChange={(event) => setPostalDraft(event.target.value)}
-              autoComplete="postal-code"
-              className="mt-4 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
-            />
-            <button
-              type="submit"
-              disabled={!trimmedPostal}
-              className="mt-4 rounded-md bg-neutral-900 px-4 py-2 text-sm text-white disabled:bg-neutral-300"
-            >
-              Continue
-            </button>
-          </form>
-        </main>
-      ) : showCart ? (
+      {showCart ? (
         <CartView
           tiers={tiers}
           items={items}
@@ -208,20 +167,13 @@ export function Planner({
                     ))}
                   </select>
                 </label>
-                <label className="grid gap-1 text-sm" htmlFor="material">
-                  <span className="font-medium text-neutral-900">Material (optional)</span>
+                <label className="grid gap-1 text-sm" htmlFor="postal-code">
+                  <span className="font-medium text-neutral-900">Postal code (optional)</span>
                   <input
-                    id="material"
-                    value={material}
-                    onChange={(event) =>
-                      setPreferences((current) => ({
-                        ...current,
-                        [itemId]: {
-                          material: event.target.value,
-                          color: current[itemId]?.color ?? "",
-                        },
-                      }))
-                    }
+                    id="postal-code"
+                    value={postalCode}
+                    onChange={(event) => setPostalCode(event.target.value)}
+                    autoComplete="postal-code"
                     className="rounded-md border border-neutral-300 px-3 py-2"
                   />
                 </label>
@@ -234,7 +186,6 @@ export function Planner({
                       setPreferences((current) => ({
                         ...current,
                         [itemId]: {
-                          material: current[itemId]?.material ?? "",
                           color: event.target.value,
                         },
                       }))
@@ -244,15 +195,13 @@ export function Planner({
                 </label>
               </div>
               <p className="mt-4 text-sm text-neutral-600">
-                Postal code {postalCode} · {itemName} · Material {materialText} · Color{" "}
-                {colorText}
+                Postal code {postalText} · {itemName} · Color {colorText}
               </p>
             </section>
 
             <PriceChartSection
               itemId={itemId}
               postalCode={postalCode}
-              material={material}
               color={color}
               selectedBandIndex={selectedBandIndex}
               onSelectBand={setSelectedBandIndex}
@@ -267,13 +216,11 @@ export function Planner({
                   ? null
                   : getChartModel(itemId, {
                       postalCode,
-                      material: material.trim() || undefined,
                       color: color.trim() || undefined,
                     }).bands[selectedBandIndex]?.label ?? null
               }
               context={{
                 postalCode,
-                material: material.trim() || undefined,
                 color: color.trim() || undefined,
               }}
               selectedListingId={cart[itemId]?.id ?? null}
@@ -331,14 +278,14 @@ export function Planner({
               </p>
             </section>
             <p className="px-1 text-xs leading-5 text-neutral-500">
-              Mock data loaded: {summary.itemCount} checklist items, {summary.bandCountPerItem}{" "}
-              price bands each, {summary.couchListingCount} couch listings, {summary.promotionCount}{" "}
-              automatic promotion.
+              {summary.couchSource === "catalog"
+                ? `Saved searches ship to 94582. They use the item words only, plus a color filter when one is saved. Saved colors: white and blue couches, brown coffee tables, and green pillows. Chairs are saved as armchairs and cabinets as cabinets, with no color filter. ${summary.couchListingCount} couch listings are saved from the general couch search. The postal code you type does not run a new search. Shipping, cart, and checkout are mock.`
+                : `Mock data loaded: ${summary.itemCount} checklist items, ${summary.bandCountPerItem} price bands each, ${summary.couchListingCount} couch listings, ${summary.promotionCount} automatic promotion.`}
             </p>
           </aside>
         </div>
       )}
-      {postalCode && prompt ? (
+      {prompt ? (
         <UnderspendDialog
           key={`${prompt.id}:${prompt.cart?.listing.id}:${prompt.cart?.quantity}`}
           item={prompt}
@@ -363,7 +310,6 @@ export function Planner({
 function PriceChartSection({
   itemId,
   postalCode,
-  material,
   color,
   selectedBandIndex,
   onSelectBand,
@@ -371,7 +317,6 @@ function PriceChartSection({
 }: {
   itemId: string;
   postalCode: string;
-  material: string;
   color: string;
   selectedBandIndex: number | null;
   onSelectBand: (index: number) => void;
@@ -381,7 +326,6 @@ function PriceChartSection({
     itemId,
     {
       postalCode,
-      material: material.trim() || undefined,
       color: color.trim() || undefined,
     },
     quantity,

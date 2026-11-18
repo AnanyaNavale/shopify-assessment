@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "fetch:couch": "node scripts/fetch-live-couch.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

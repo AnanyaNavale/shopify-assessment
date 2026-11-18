@@ -47,7 +47,7 @@ export function ListingsSection({
       <h2 className="text-sm font-medium text-neutral-900">Listings · {bandLabel}</h2>
       {none ? (
         <p className="mt-4 text-sm text-neutral-600">
-          The mock catalog has no listings for this band.
+          No saved listings for this band.
         </p>
       ) : (
         <div className="mt-4 grid gap-6">
@@ -152,7 +152,8 @@ function ListingRow({
           <span className="block text-sm font-medium text-neutral-900">{listing.title}</span>
           <span className="block text-sm text-neutral-800">{formatCents(listing.priceCents)}</span>
           <span className="block text-xs text-neutral-500">
-            {listing.sellerName} · {listing.rating.toFixed(1)}
+            {listing.sellerName}
+            {listing.rating === null ? "" : ` · ${listing.rating.toFixed(1)}`}
           </span>
         </span>
         <span className="flex shrink-0 gap-1">
@@ -206,7 +207,9 @@ function ListingDialog({ listing, onClose }: { listing: Listing; onClose: () => 
         {listing.title}
       </h3>
       <p className="mt-3 text-sm text-neutral-800">Seller {listing.sellerName}</p>
-      <p className="mt-1 text-sm text-neutral-800">Rating {listing.rating.toFixed(1)}</p>
+      {listing.rating === null ? null : (
+        <p className="mt-1 text-sm text-neutral-800">Rating {listing.rating.toFixed(1)}</p>
+      )}
       <p className="mt-1 text-sm text-neutral-800">
         {onSale ? (
           <>

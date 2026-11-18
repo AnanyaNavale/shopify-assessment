@@ -8,6 +8,8 @@ import {
   useSensor,
   useSensors,
   type DragEndEvent,
+  type DraggableAttributes,
+  type DraggableSyntheticListeners,
 } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -17,6 +19,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useEffect, useState } from "react";
 import { formatCents, type ChecklistItem, type ChecklistTier, type Listing } from "@/lib/catalog";
 import { getChartModel, type BudgetRange } from "@/lib/market";
 import { buildAdjustedBudget, type ItemPreference } from "@/lib/plan";
@@ -50,6 +53,10 @@ export function BudgetPanel({
   onQuantityChange: (itemId: string, quantity: number) => void;
   onEnabledChange: (itemId: string, on: boolean) => void;
 }) {
+  const [dragReady, setDragReady] = useState(false);
+  useEffect(() => {
+    setDragReady(true);
+  }, []);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -97,47 +104,37 @@ export function BudgetPanel({
         <p className="mt-1 text-xs text-neutral-500">
           Top of a tier is the higher priority. Shipping is included once per item.
         </p>
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-          <div className="mt-4 grid gap-4">
-            {tiers.map((tier) => {
-              const ids = order[tier.id] ?? [];
-              return (
-                <div key={tier.id}>
-                  <h3 className="text-xs font-medium tracking-wide text-neutral-500 uppercase">
-                    Tier {tier.id} — {tier.name}
-                  </h3>
-                  <SortableContext items={ids} strategy={verticalListSortingStrategy}>
-                    <ul className="mt-2 grid gap-2">
-                      {ids.map((id) => {
-                        const item = itemsById.get(id);
-                        if (!item) {
-                          return null;
-                        }
-                        return (
-                          <ChecklistRow
-                            key={item.id}
-                            item={item}
-                            quantity={quantities[item.id] ?? 0}
-                            on={enabled[item.id] ?? false}
-                            adjustment={adjustmentOf.get(item.id)}
-                            rangeNote={rangeNote(
-                              item,
-                              quantities[item.id] ?? 0,
-                              preferences[item.id],
-                              postalCode,
-                            )}
-                            onQuantityChange={onQuantityChange}
-                            onEnabledChange={onEnabledChange}
-                          />
-                        );
-                      })}
-                    </ul>
-                  </SortableContext>
-                </div>
-              );
-            })}
-          </div>
-        </DndContext>
+        {dragReady ? (
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+            <TierLists
+              tiers={tiers}
+              order={order}
+              itemsById={itemsById}
+              quantities={quantities}
+              enabled={enabled}
+              preferences={preferences}
+              postalCode={postalCode}
+              adjustmentOf={adjustmentOf}
+              onQuantityChange={onQuantityChange}
+              onEnabledChange={onEnabledChange}
+              sortable
+            />
+          </DndContext>
+        ) : (
+          <TierLists
+            tiers={tiers}
+            order={order}
+            itemsById={itemsById}
+            quantities={quantities}
+            enabled={enabled}
+            preferences={preferences}
+            postalCode={postalCode}
+            adjustmentOf={adjustmentOf}
+            onQuantityChange={onQuantityChange}
+            onEnabledChange={onEnabledChange}
+            sortable={false}
+          />
+        )}
       </section>
       <section className="rounded-lg border border-neutral-200 bg-white p-5">
         <h2 className="text-sm font-medium text-neutral-900">Room total</h2>
@@ -175,7 +172,7 @@ function itemRanges(
     item.id,
     {
       postalCode,
-      material: preference?.material.trim() || undefined,
+      material: preference?.material?.trim() || undefined,
       color: preference?.color.trim() || undefined,
     },
     quantity,
@@ -196,15 +193,75 @@ function rangeNote(
     .join(" ");
 }
 
-function ChecklistRow({
-  item,
-  quantity,
-  on,
-  adjustment,
-  rangeNote: note,
+function TierLists({
+  tiers,
+  order,
+  itemsById,
+  quantities,
+  enabled,
+  preferences,
+  postalCode,
+  adjustmentOf,
   onQuantityChange,
   onEnabledChange,
+  sortable,
 }: {
+  tiers: ChecklistTier[];
+  order: Record<number, string[]>;
+  itemsById: Map<string, ChecklistItem>;
+  quantities: Record<string, number>;
+  enabled: Record<string, boolean>;
+  preferences: Record<string, ItemPreference>;
+  postalCode: string;
+  adjustmentOf: Map<string, AdjustedBudget>;
+  onQuantityChange: (itemId: string, quantity: number) => void;
+  onEnabledChange: (itemId: string, on: boolean) => void;
+  sortable: boolean;
+}) {
+  return (
+    <div className="mt-4 grid gap-4">
+      {tiers.map((tier) => {
+        const ids = order[tier.id] ?? [];
+        const rows = ids.map((id) => {
+          const item = itemsById.get(id);
+          if (!item) {
+            return null;
+          }
+          const rowProps = {
+            item,
+            quantity: quantities[item.id] ?? 0,
+            on: enabled[item.id] ?? false,
+            adjustment: adjustmentOf.get(item.id),
+            rangeNote: rangeNote(item, quantities[item.id] ?? 0, preferences[item.id], postalCode),
+            onQuantityChange,
+            onEnabledChange,
+          };
+          return sortable ? (
+            <ChecklistRow key={item.id} {...rowProps} />
+          ) : (
+            <ChecklistRowBody key={item.id} {...rowProps} />
+          );
+        });
+        return (
+          <div key={tier.id}>
+            <h3 className="text-xs font-medium tracking-wide text-neutral-500 uppercase">
+              Tier {tier.id} — {tier.name}
+            </h3>
+            {sortable ? (
+              <SortableContext items={ids} strategy={verticalListSortingStrategy}>
+                <ul className="mt-2 grid gap-2">{rows}</ul>
+              </SortableContext>
+            ) : (
+              <ul className="mt-2 grid gap-2">{rows}</ul>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+type ChecklistRowProps = {
   item: ChecklistItem;
   quantity: number;
   on: boolean;
@@ -212,15 +269,46 @@ function ChecklistRow({
   rangeNote: string;
   onQuantityChange: (itemId: string, quantity: number) => void;
   onEnabledChange: (itemId: string, on: boolean) => void;
-}) {
+};
+
+function ChecklistRow(props: ChecklistRowProps) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
-    id: item.id,
+    id: props.item.id,
   });
 
   return (
+    <ChecklistRowBody
+      {...props}
+      setNodeRef={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      dragAttributes={attributes}
+      dragListeners={listeners}
+    />
+  );
+}
+
+function ChecklistRowBody({
+  item,
+  quantity,
+  on,
+  adjustment,
+  rangeNote: note,
+  onQuantityChange,
+  onEnabledChange,
+  setNodeRef,
+  style,
+  dragAttributes,
+  dragListeners,
+}: ChecklistRowProps & {
+  setNodeRef?: (element: HTMLElement | null) => void;
+  style?: { transform?: string; transition?: string };
+  dragAttributes?: DraggableAttributes;
+  dragListeners?: DraggableSyntheticListeners;
+}) {
+  return (
     <li
       ref={setNodeRef}
-      style={{ transform: CSS.Transform.toString(transform), transition }}
+      style={style}
       className={`rounded-md border border-neutral-200 p-2 ${on ? "" : "opacity-50"}`}
     >
       <div className="flex items-center gap-2">
@@ -228,8 +316,8 @@ function ChecklistRow({
           type="button"
           className="cursor-grab px-1 text-xs text-neutral-400"
           aria-label={`Reorder ${item.name}`}
-          {...attributes}
-          {...listeners}
+          {...dragAttributes}
+          {...dragListeners}
         >
           Drag
         </button>
