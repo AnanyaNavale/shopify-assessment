@@ -1,4 +1,4 @@
-# Room Budget Planner
+# Headroom – Furnishing Budget Planner
 
 A desktop prototype of a furnishing planner for [Shop on the web](https://shop.app). It helps someone furnishing a living room see what a reasonable budget looks like, pick real products inside that picture, and watch the rest of the room adjust when one choice costs more or less than planned.
 
